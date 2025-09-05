@@ -79,4 +79,11 @@ async def anonymize_text(request: TextRequest):
 if __name__ == "__main__":
     import uvicorn
     logger.info("Starting PII Anonymizer API server")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=False,
+        workers=4,
+        access_log=True
+    )
