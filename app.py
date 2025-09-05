@@ -76,14 +76,24 @@ async def anonymize_text(request: TextRequest):
         logger.error(f"Error during anonymization: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting PII Anonymizer API")
+    try:
+        # Verify spaCy model is loaded
+        import spacy
+        nlp = spacy.load("en_core_web_lg")
+        logger.info("Successfully loaded spaCy model")
+    except Exception as e:
+        logger.error(f"Error loading spaCy model: {str(e)}")
+        raise
+
 if __name__ == "__main__":
     import uvicorn
     logger.info("Starting PII Anonymizer API server")
     uvicorn.run(
-        "app:app",
+        app,
         host="0.0.0.0",
         port=8000,
-        reload=False,
-        workers=4,
-        access_log=True
+        log_level="info"
     )
