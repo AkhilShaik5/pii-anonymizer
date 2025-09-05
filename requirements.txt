@@ -4,7 +4,7 @@ fastapi==0.116.1
 uvicorn[standard]==0.35.0
 python-multipart>=0.0.5
 spacy>=3.8.0
-en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl
+en-core-web-sm>=3.8.0
 httptools>=0.5.0
 uvloop>=0.17.0
 websockets>=10.4

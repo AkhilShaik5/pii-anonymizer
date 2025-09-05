@@ -89,7 +89,7 @@ async def startup_event():
         
         # Verify spaCy model is loaded
         import spacy
-        nlp = spacy.load("en_core_web_lg")
+        nlp = spacy.load("en_core_web_sm")
         logger.info("Successfully loaded spaCy model")
         
         # Test Presidio initialization
