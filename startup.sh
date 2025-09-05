@@ -1,14 +1,15 @@
 #!/bin/bash
+set -e
 echo "Starting application initialization..."
 
-# Activate virtual environment if it exists
-if [ -d /antenv ]; then
-    echo "Activating virtual environment..."
-    source /antenv/bin/activate
-fi
+# Create and activate virtual environment
+echo "Setting up virtual environment..."
+python -m venv env
+source env/bin/activate || source env/Scripts/activate
 
 # Install dependencies
 echo "Installing dependencies..."
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 
 # Download spaCy model
@@ -23,5 +24,6 @@ gunicorn --worker-class uvicorn.workers.UvicornWorker \
          --workers 4 \
          --access-logfile - \
          --error-logfile - \
-         --log-level info \
-         app:app
+         --log-level debug \
+         --reload \
+         wsgi:app
