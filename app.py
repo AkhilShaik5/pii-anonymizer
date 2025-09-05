@@ -80,13 +80,48 @@ async def anonymize_text(request: TextRequest):
 async def startup_event():
     logger.info("Starting PII Anonymizer API")
     try:
+        # Log environment information
+        import os
+        import sys
+        logger.info(f"Python version: {sys.version}")
+        logger.info(f"Current working directory: {os.getcwd()}")
+        logger.info(f"Files in current directory: {os.listdir('.')}")
+        
         # Verify spaCy model is loaded
         import spacy
         nlp = spacy.load("en_core_web_lg")
         logger.info("Successfully loaded spaCy model")
+        
+        # Test Presidio initialization
+        logger.info("Testing Presidio initialization...")
+        test_text = "John Doe lives in New York"
+        results = analyzer.analyze(text=test_text, language="en")
+        logger.info(f"Presidio test analysis found {len(results)} entities")
+        
     except Exception as e:
-        logger.error(f"Error loading spaCy model: {str(e)}")
+        logger.error(f"Startup error: {str(e)}")
+        logger.exception("Full startup error details:")
         raise
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    try:
+        # Test Presidio
+        test_text = "John Doe lives in New York"
+        results = analyzer.analyze(text=test_text, language="en")
+        return {
+            "status": "healthy",
+            "message": "PII Anonymizer API is running",
+            "presidio_status": "ok",
+            "entities_found": len(results)
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "message": str(e)
+        }
 
 if __name__ == "__main__":
     import uvicorn
@@ -95,5 +130,5 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        log_level="info"
+        log_level="debug"
     )
