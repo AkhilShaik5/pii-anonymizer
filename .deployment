@@ -1,3 +1,4 @@
 [config]
-SCM_DO_BUILD_DURING_DEPLOYMENT=1
-POST_BUILD_COMMAND=chmod +x startup.sh
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+PYTHON_ENABLE_WORKER_MP=1
+POST_BUILD_COMMAND=pip install -r requirements.txt; python -m spacy download en_core_web_lg
