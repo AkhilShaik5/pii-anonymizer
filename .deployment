@@ -1,8 +1,3 @@
 [config]
 SCM_DO_BUILD_DURING_DEPLOYMENT=1
-
-[python]
-version=3.11
-
-[app]
-startup_command=python -m spacy download en_core_web_lg && gunicorn --bind=0.0.0.0 --timeout 600 app:app
+POST_BUILD_COMMAND=chmod +x startup.sh
