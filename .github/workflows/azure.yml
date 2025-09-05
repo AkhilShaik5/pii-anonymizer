@@ -1,6 +1,5 @@
 name: Deploy to Azure App Service
 
-# Workflow for deploying to Azure App Service
 on:
   push:
     branches:
@@ -24,10 +23,30 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         python -m spacy download en_core_web_lg
-    
+        
+    - name: Generate deployment package
+      run: |
+        # Create deployment package
+        zip -r deployment.zip . -x "*.git*"
+        
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: .
+        package: ./deployment.zip
+        
+    - name: Configure App Settings
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          az webapp config appsettings set --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group presidio-pii-rg --settings \
+            SCM_DO_BUILD_DURING_DEPLOYMENT=true \
+            PYTHON_VERSION=3.11 \
+            WEBSITES_PORT=8000 \
+            STARTUP_COMMAND="python -m spacy download en_core_web_lg && gunicorn --bind=0.0.0.0 --timeout 600 app:app"
