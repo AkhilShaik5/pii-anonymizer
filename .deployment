@@ -1,4 +1,7 @@
 [config]
 SCM_DO_BUILD_DURING_DEPLOYMENT=true
 PYTHON_ENABLE_WORKER_MP=1
-POST_BUILD_COMMAND=pip install -r requirements.txt; python -m spacy download en_core_web_lg
+ENABLE_ORYX_BUILD=false
+PYTHON_DISABLE_GUNICORN=true
+STARTUP_COMMAND_PATH=startup_command.txt
+POST_BUILD_COMMAND=pip install -r requirements.txt && python -m spacy download en_core_web_lg
