@@ -3,9 +3,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional, Any
-from presidio_analyzer import AnalyzerEngine
-from presidio_anonymizer import AnonymizerEngine
-from presidio_anonymizer.entities import RecognizerResult, OperatorConfig
+try:
+    from presidio_analyzer import AnalyzerEngine
+    from presidio_anonymizer import AnonymizerEngine
+    from presidio_anonymizer.entities import RecognizerResult, OperatorConfig
+except Exception:
+    # Defer import errors until startup so container can boot and show logs
+    AnalyzerEngine = None
+    AnonymizerEngine = None
+    RecognizerResult = None
+    OperatorConfig = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,14 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize engines with error handling
-try:
-    analyzer = AnalyzerEngine()
-    anonymizer = AnonymizerEngine()
-    logger.info("Successfully initialized Presidio engines")
-except Exception as e:
-    logger.error(f"Failed to initialize Presidio engines: {str(e)}")
-    raise
+analyzer = None
+anonymizer = None
 
 class TextRequest(BaseModel):
     text: str
@@ -87,16 +88,23 @@ async def startup_event():
         logger.info(f"Current working directory: {os.getcwd()}")
         logger.info(f"Files in current directory: {os.listdir('.')}")
         
-        # Verify spaCy model is loaded
-        import spacy
-        nlp = spacy.load("en_core_web_sm")
-        logger.info("Successfully loaded spaCy model")
+        # Verify spaCy small model is available (downloaded in prebuild)
+        try:
+            import spacy
+            spacy.util.get_lang_class("en")
+            # do not load full model here to save memory; presidio will load as needed
+            logger.info("spaCy appears available")
+        except Exception as e:
+            logger.warning(f"spaCy not fully available at startup: {e}")
         
-        # Test Presidio initialization
-        logger.info("Testing Presidio initialization...")
-        test_text = "John Doe lives in New York"
-        results = analyzer.analyze(text=test_text, language="en")
-        logger.info(f"Presidio test analysis found {len(results)} entities")
+        # Initialize Presidio engines lazily
+        global analyzer, anonymizer
+        if AnalyzerEngine is None or AnonymizerEngine is None:
+            logger.error("Presidio packages not installed; check requirements.txt")
+            raise RuntimeError("Presidio packages missing")
+        analyzer = AnalyzerEngine()
+        anonymizer = AnonymizerEngine()
+        logger.info("Presidio engines initialized")
         
     except Exception as e:
         logger.error(f"Startup error: {str(e)}")

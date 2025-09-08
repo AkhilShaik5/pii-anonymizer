@@ -6,7 +6,7 @@ bind = "0.0.0.0:8000"
 backlog = 2048
 
 # Worker processes
-workers = 4  # Set to a fixed number for Azure
+workers = 1  # Use 1 worker to reduce memory/disk pressure on App Service
 worker_class = "uvicorn.workers.UvicornWorker"  # Use ASGI worker for FastAPI
 threads = 2
 timeout = 600

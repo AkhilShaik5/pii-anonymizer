@@ -2,6 +2,6 @@
 SCM_DO_BUILD_DURING_DEPLOYMENT=true
 PYTHON_ENABLE_WORKER_MP=1
 ENABLE_ORYX_BUILD=true
-STARTUP_COMMAND=python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 4
+STARTUP_COMMAND=python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
 PRE_BUILD_SCRIPT_PATH=prebuild.sh
-POST_BUILD_COMMAND=rm -rf /tmp/* && python -m spacy download en_core_web_sm
+POST_BUILD_COMMAND=rm -rf /tmp/*

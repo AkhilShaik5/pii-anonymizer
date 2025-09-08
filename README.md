@@ -18,6 +18,17 @@ pip install -r requirements.txt
 ```
 
 2. Run the application:
+
+## Simplified Azure deployment notes
+
+- This repo has been updated to use `en_core_web_sm` (small spaCy model) and a single worker to reduce disk and memory usage on Azure App Service.
+- Ensure `prebuild.sh` runs during deployment to download the spaCy model.
+- If the app fails with "No space left on device" clean `/home/site/CodeProfiler`, `/tmp`, and large model files via Kudu before restarting.
+
+Client example
+
+Run `client_example.py` while the server is running to test the anonymization endpoint locally.
+
 ```bash
 python app.py
 ```
